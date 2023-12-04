@@ -32,7 +32,7 @@ float SceneOneObstacleX[] = { 1.0, 1.6, 0.3, 1.2, -0.9, 0, 1.4, -0.8, 0.8, 0 };
 float SceneOneObstacleZ[] = { 10, 12.3, 15, 17, 21, 21.5, 25, 26, 26.5, 27 };
 
 float SceneTwoObstacleX[] = { 1.3, 1.8, -0.9, 1.3, 1.4, 0.75, -1.4, -0.8, 0.8, 0 };
-float SceneTwoObstacleZ[] = { 12, 14.3, 17, 21, 23, 25.5, 27, 28.5, 29.75, 30.5 };
+float SceneTwoObstacleZ[] = { 12, 14.3, 17, 21, 23, 25.5, 27, 28.5, 28.75, 29 };
 
 float obstacleSize = 0.4f;
 
@@ -48,7 +48,7 @@ bool firstPersonView = false; // To toggle between first-person and normal views
 bool thirdPersonView = false; // To toggle between third-person and normal views
 
 bool sceneOne = true; // To toggle between scene one and scene two
-bool sceneTwo = false; // To toggle between scene one and scene two
+bool sceneTwo = false; // To toggle between scene one and scene two  
 
 
 class Vector3f {
@@ -584,6 +584,38 @@ void updateGameTimer(int value) {
 	glutTimerFunc(1000, updateGameTimer, 0);
 }
 
+void drawSceneTransition() {
+	// Clear the depth buffer to allow the text to appear on top
+	glClear(GL_DEPTH_BUFFER_BIT);
+
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glLoadIdentity();
+	gluOrtho2D(0, glutGet(GLUT_WINDOW_WIDTH), 0, glutGet(GLUT_WINDOW_HEIGHT));
+
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadIdentity();
+
+	// Set color for the transition message
+	glColor3f(1.0, 1.0, 1.0); // White color
+
+	const char* transitionMsg = (sceneTwo ? "Level : 2" : "Level : 1");
+	glRasterPos2f(glutGet(GLUT_WINDOW_WIDTH) / 2.0 - 309, glutGet(GLUT_WINDOW_HEIGHT) / 2.0 + 180);
+
+	// Draw the transition message
+	while (*transitionMsg) {
+		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *transitionMsg++);
+	}
+
+	// Restore matrices
+	glPopMatrix();
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);
+}
+
+
 void Display() {
 	setupCamera();
 	setupLights();
@@ -669,6 +701,11 @@ void Display() {
 			glPushMatrix();
 			drawCollectibles();
 			glPopMatrix();
+
+			glPushMatrix();
+			drawSceneTransition();
+			glPopMatrix();
+
 
 		}
 
@@ -797,10 +834,11 @@ void Display() {
 			drawCollectibles();
 			glPopMatrix();
 
+			glPushMatrix();
+			drawSceneTransition();
+			glPopMatrix();
+
 		}
-
-		
-
 
 	}
 
@@ -925,6 +963,8 @@ void main(int argc, char** argv) {
 
 	// Set up the initial timer call for game timer
 	glutTimerFunc(1000, updateGameTimer, 0);
+
+
 
 
 
