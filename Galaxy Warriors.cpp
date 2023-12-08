@@ -130,24 +130,14 @@ public:
 		center = eye + view;
 	}
 
-	void viewTop() {
+	void viewFirst() {
 		eye.x = 0.000982938; eye.y = 9.57839; eye.z = -0.219619;
 		center.x = 0.00101701; center.y = 8.57836; center.z = -0.226333;
 	}
 
-	void viewFront() {
+	void viewThird() {
 		eye.x = -0.0210365; eye.y = 0.803742; eye.z = 4.08213;
 		center.x = -0.0159924; center.y = 0.688444; center.z = 3.08881;
-	}
-
-	void viewSide() {
-		eye.x = 4.07816; eye.y = 0.685027; eye.z = 0.0150442;
-		center.x = 3.07898; center.y = 0.644756; center.z = 0.0123142;
-	}
-
-	void view3D() {
-		eye.x = 2.24816; eye.y = 2.6667; eye.z = 2.24816;
-		center.x = 1.6868; center.y = 2.05864; center.z = 1.6868;
 	}
 
 	void look() {
@@ -405,6 +395,19 @@ void Keyboard(unsigned char key, int x, int y) {
 	}
 
 	glutPostRedisplay();
+}
+
+void Mouse(int button, int state, int x, int y) {
+	if (button == GLUT_RIGHT_BUTTON) {
+		if (state == GLUT_DOWN) {
+			camera.viewThird();
+		}
+	}
+	else if (button == GLUT_LEFT_BUTTON) {
+		if (state == GLUT_DOWN) {
+			camera.viewFirst();
+		}
+	}
 }
 
 void Timer(int value) {
