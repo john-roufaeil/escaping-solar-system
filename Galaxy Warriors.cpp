@@ -424,10 +424,14 @@ void setupLights() {
 	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 	glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, spot_direction);
 
+	GLfloat diffuse_color[] = { 2.0, 2.0, 2.0, 1.0 };
+	GLfloat specular_color[] = { 2.0, 2.0, 2.0, 1.0 };
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse_color);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, specular_color);
+
 	glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 20.0f);
 	glLightf(GL_LIGHT0, GL_SPOT_EXPONENT, 10.0f);
 
-	// Set attenuation to control the light range
 	glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 1.0f);
 	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.10f);
 	glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.01f);
@@ -530,6 +534,7 @@ void spachShipMovement(int value) {
 }
 
 void drawScore(int score) {
+	glDisable(GL_LIGHTING);
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	glLoadIdentity();
@@ -555,9 +560,11 @@ void drawScore(int score) {
 	glMatrixMode(GL_PROJECTION);
 	glPopMatrix();
 	glMatrixMode(GL_MODELVIEW);
+	glEnable(GL_LIGHTING);
 }
 
 void drawHealth(int health) {
+	glDisable(GL_LIGHTING);
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	glLoadIdentity();
@@ -583,9 +590,12 @@ void drawHealth(int health) {
 	glMatrixMode(GL_PROJECTION);
 	glPopMatrix();
 	glMatrixMode(GL_MODELVIEW);
+	glEnable(GL_LIGHTING);
+
 }
 
 void drawTimer(int time) {
+	glDisable(GL_LIGHTING);
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	glLoadIdentity();
@@ -608,6 +618,7 @@ void drawTimer(int time) {
 	glMatrixMode(GL_PROJECTION);
 	glPopMatrix();
 	glMatrixMode(GL_MODELVIEW);
+	glEnable(GL_LIGHTING);
 }
 
 void updateGameTimer(int value) {
@@ -630,6 +641,7 @@ void updateGameTimer(int value) {
 }
 
 void drawSceneTransition() {
+	glDisable(GL_LIGHTING);
 	// Clear the depth buffer to allow the text to appear on top
 	glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -658,6 +670,7 @@ void drawSceneTransition() {
 	glMatrixMode(GL_PROJECTION);
 	glPopMatrix();
 	glMatrixMode(GL_MODELVIEW);
+	glEnable(GL_LIGHTING);
 }
 
 void Display() {
@@ -668,6 +681,7 @@ void Display() {
 	if (sceneOne) {
 
 		if (isGameOver || health <= 0) {
+			glDisable(GL_LIGHTING);
 			// Display "Game Over" message
 			glMatrixMode(GL_PROJECTION);
 			glPushMatrix();
@@ -714,10 +728,10 @@ void Display() {
 			glMatrixMode(GL_PROJECTION);
 			glPopMatrix();
 			glMatrixMode(GL_MODELVIEW);
+			glEnable(GL_LIGHTING);
 		}
 
 		else {
-
 			glPushMatrix();
 			drawScore(score);
 			glPopMatrix();
@@ -754,7 +768,7 @@ void Display() {
 
 	else if (sceneTwo) {
 		if (checkPlanetCollision && isGameOver && health != 0 && remainingTime != 0 && score != 0) {
-
+			glDisable(GL_LIGHTING);
 			// Display "Congratulations, You Won!" message
 			glMatrixMode(GL_PROJECTION);
 			glPushMatrix();
@@ -793,10 +807,11 @@ void Display() {
 			glMatrixMode(GL_PROJECTION);
 			glPopMatrix();
 			glMatrixMode(GL_MODELVIEW);
+			glEnable(GL_LIGHTING);
 		}
 
 		else if (isGameOver || health <= 0) {
-
+			glDisable(GL_LIGHTING);
 			// Display "Game Over" message
 			glMatrixMode(GL_PROJECTION);
 			glPushMatrix();
@@ -846,6 +861,7 @@ void Display() {
 			glMatrixMode(GL_PROJECTION);
 			glPopMatrix();
 			glMatrixMode(GL_MODELVIEW);
+			glEnable(GL_LIGHTING);
 		}
 
 		else {
