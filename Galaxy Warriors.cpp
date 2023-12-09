@@ -75,16 +75,19 @@ void init() {
 	transitionMusic = engine->addSoundSourceFromFile("media/transition.mp3");
 	winMusic = engine->addSoundSourceFromFile("media/win.mp3");
 	loseMusic = engine->addSoundSourceFromFile("media/lose.mp3");
-	if (!backgroundMusic || !transitionMusic|| !powerupMusic || !explosionMusic || !winMusic || !loseMusic) exit(1);
+	if (!backgroundMusic || !transitionMusic || !powerupMusic || !explosionMusic || !winMusic || !loseMusic) {
+		cerr << "Error loading sound sources." << endl;
+		exit(1);
+	}
 }
 
 void cleanup() {
 	if (engine) {
+		backgroundMusic->stop();
 		engine->drop();
 		engine = nullptr;
 	}
 }
-
 
 class Vector3f {
 public:
@@ -413,20 +416,23 @@ bool checkPlanetCollision(float shipX, float shipZ, float planetX, float planetZ
 }
 
 void setupLights() {
-	GLfloat ambient[] = { 0.7f, 0.7f, 0.7, 1.0f };
-	GLfloat diffuse[] = { 0.6f, 0.6f, 0.6, 1.0f };
-	GLfloat specular[] = { 1.0f, 1.0f, 1.0, 1.0f };
-	GLfloat shininess[] = { 50 };
-	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, ambient);
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
-	glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
-	glMaterialfv(GL_FRONT, GL_SHININESS, shininess);
+	GLfloat ambient_color[] = { 0.2, 0.2, 0.2, 1.0 };
+	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient_color);
 
-	GLfloat lightIntensity[] = { 0.7f, 0.7f, 1, 1.0f };
-	GLfloat lightPosition[] = { -7.0f, 6.0f, 3.0f, 0.0f };
-	glLightfv(GL_LIGHT0, GL_POSITION, lightIntensity);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, lightIntensity);
+	GLfloat light_position[] = { spaceshipX, 0.0f, spaceshipZ + 1, 1.0f };
+	GLfloat spot_direction[] = { 0.0f, 0.0f, -1.0f };
+	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+	glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, spot_direction);
+
+	glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 20.0f);
+	glLightf(GL_LIGHT0, GL_SPOT_EXPONENT, 10.0f);
+
+	// Set attenuation to control the light range
+	glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 1.0f);
+	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.10f);
+	glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.01f);
 }
+
 
 void setupCamera() {
 	glMatrixMode(GL_PROJECTION);
@@ -654,14 +660,10 @@ void drawSceneTransition() {
 	glMatrixMode(GL_MODELVIEW);
 }
 
-
 void Display() {
 	setupCamera();
-	setupLights();
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-
 
 	if (sceneOne) {
 
@@ -732,7 +734,6 @@ void Display() {
 			drawSpaceship();
 			glPopMatrix();
 
-
 			glPushMatrix();
 			drawPlanet(sceneOnePlanetX, sceneOnePlanetZ);
 			glPopMatrix();
@@ -748,15 +749,10 @@ void Display() {
 			glPushMatrix();
 			drawSceneTransition();
 			glPopMatrix();
-
-
 		}
-
-
 	}
+
 	else if (sceneTwo) {
-
-
 		if (checkPlanetCollision && isGameOver && health != 0 && remainingTime != 0 && score != 0) {
 
 			// Display "Congratulations, You Won!" message
@@ -831,7 +827,6 @@ void Display() {
 				glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *scoreMsg++);
 			}
 
-
 			std::string scoreString = std::to_string(score);
 
 			// Draw the actual score value
@@ -851,11 +846,9 @@ void Display() {
 			glMatrixMode(GL_PROJECTION);
 			glPopMatrix();
 			glMatrixMode(GL_MODELVIEW);
-
 		}
 
 		else {
-
 			glPushMatrix();
 			drawScore(score);
 			glPopMatrix();
@@ -887,11 +880,8 @@ void Display() {
 			glPushMatrix();
 			drawSceneTransition();
 			glPopMatrix();
-
 		}
-
 	}
-
 	glFlush();
 }
 
@@ -963,21 +953,19 @@ void main(int argc, char** argv) {
 	init();
 
 	glutCreateWindow("Guardians Of The Galaxy");
-	glutDisplayFunc(Display);
 	glutKeyboardFunc(Keyboard);
 	glutSpecialFunc(Special);
+	glutMouseFunc(mouseClick);
+	glutTimerFunc(1000, updateGameTimer, 0);
+	glutDisplayFunc(Display);
 
 	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH);
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-
 	glutTimerFunc(16, spachShipMovement, 0);
 
-	// mouse click function
-	glutMouseFunc(mouseClick);
+	setupLights();
 
-	// Set up the initial timer call for game timer
-	glutTimerFunc(1000, updateGameTimer, 0);
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);
