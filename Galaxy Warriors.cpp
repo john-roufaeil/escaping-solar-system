@@ -898,28 +898,9 @@ void Keyboard(unsigned char key, int x, int y) {
 	float d = 0.1;
 
 	switch (key) {
-	case 'w':
-		camera.moveY(d);
-		break;
-	case 's':
-		camera.moveY(-d);
-		break;
-	case 'a':
-		camera.moveX(d);
-		break;
-	case 'd':
-		camera.moveX(-d);
-		break;
-	case 'q':
-		camera.moveZ(d);
-		break;
-	case 'e':
-		camera.moveZ(-d);
-		break;
-
-	case GLUT_KEY_ESCAPE:
-		exit(EXIT_SUCCESS);
-	}
+		case GLUT_KEY_ESCAPE:
+			exit(EXIT_SUCCESS);
+		}
 
 	glutPostRedisplay();
 }
@@ -930,27 +911,14 @@ void Special(int key, int x, int y) {
 	float maxX = static_cast<float>(windowWidth) / 2.0f;
 
 	switch (key) {
-	case GLUT_KEY_UP:
-		//camera.rotateX(a);
-		//spaceshipZ += d;
-		//printf("spaceshipZ: %f\n", spaceshipZ);
-		break;
-	case GLUT_KEY_DOWN:
-		//camera.rotateX(-a);
-		/*if (spaceshipZ - d > -1.6) {
-			spaceshipZ -= d;
-			}*/
-			//printf("spaceshipZ: %f\n", spaceshipZ);
-		break;
+	
 	case GLUT_KEY_LEFT:
-		//camera.rotateY(a);
 		if (spaceshipX + d < 1.6) {
 			spaceshipX += d;
 		}
 		//printf("spaceshipX: %f\n", spaceshipX);
 		break;
 	case GLUT_KEY_RIGHT:
-		//camera.rotateY(-a);
 		if (spaceshipX - d > -1.6) {
 			spaceshipX -= d;
 		}
@@ -960,11 +928,7 @@ void Special(int key, int x, int y) {
 	glutPostRedisplay();
 }
 
-
-
 void mouseClick(int button, int state, int x, int y) {
-
-
 	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) { // First-person view
 		firstPersonView = true;
 		camera.eye.z = spaceshipZ + 1.0; // Adjust the camera's distance from the spaceship
@@ -975,19 +939,16 @@ void mouseClick(int button, int state, int x, int y) {
 		camera.center.y = 0.0;
 
 	}
+
 	else if (button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN) { // Third-person view
 		firstPersonView = false;
-
 		camera.eye.x = 0.0f;
 		camera.eye.y = 2.0f;
 		camera.eye.z = spaceshipZ - 3.0; // Adjust the camera's distance from the spaceship
 		camera.center.x = 0.0f;
 		camera.center.y = 0.0f;
 		camera.center.z = spaceshipZ;
-
 	}
-
-
 }
 
 void main(int argc, char** argv) {
@@ -1014,10 +975,6 @@ void main(int argc, char** argv) {
 
 	// Set up the initial timer call for game timer
 	glutTimerFunc(1000, updateGameTimer, 0);
-
-
-
-
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);
