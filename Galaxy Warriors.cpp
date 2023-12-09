@@ -497,6 +497,7 @@ void spachShipMovement(int value) {
 				isGameOver = true;
 				backgroundMusic->stop();
 				engine->play2D(winMusic, false);
+				playedEndMusic = true;
 			}
 
 		}
@@ -514,6 +515,7 @@ void spachShipMovement(int value) {
 		else {
 			camera.eye.z = spaceshipZ - 3.0; // Adjust the camera's distance from the spaceship
 			camera.center.z = spaceshipZ;
+			camera.center.x = spaceshipX;
 		}
 
 
@@ -612,9 +614,13 @@ void updateGameTimer(int value) {
 	remainingTime--;
 
 	if (remainingTime <= 0) {
-		isGameOver = true;
-		backgroundMusic->stop();
-		engine->play2D(loseMusic, false);
+		if (!playedEndMusic) 
+		{
+			isGameOver = true;
+			backgroundMusic->stop();
+			engine->play2D(loseMusic, false);
+			playedEndMusic = true;
+		}
 	}
 	glutPostRedisplay();
 
