@@ -415,26 +415,63 @@ bool checkPlanetCollision(float shipX, float shipZ, float planetX, float planetZ
 	return false;
 }
 
-void setupLights() {
+
+void setupSpaceshipLights() {
+	
 	GLfloat ambient_color[] = { 0.2, 0.2, 0.2, 1.0 };
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient_color);
-
 	GLfloat light_position[] = { spaceshipX, 0.0f, spaceshipZ + 1, 1.0f };
 	GLfloat spot_direction[] = { 0.0f, 0.0f, -1.0f };
 	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 	glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, spot_direction);
-
 	GLfloat diffuse_color[] = { 2.0, 2.0, 2.0, 1.0 };
 	GLfloat specular_color[] = { 2.0, 2.0, 2.0, 1.0 };
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse_color);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, specular_color);
 
 	glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 20.0f);
-	glLightf(GL_LIGHT0, GL_SPOT_EXPONENT, 10.0f);
+	glLightf(GL_LIGHT0, GL_SPOT_EXPONENT, 20.0f);
 
 	glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 1.0f);
 	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.10f);
 	glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.01f);
+	
+}
+
+GLfloat dynamicIntensity = 0.0f;
+int intensityDirection = 1;
+
+void setupLights() {
+	GLfloat second_light_position[] = { spaceshipX, 0.0f, spaceshipZ + 1, 1.0f };
+	GLfloat second_spot_direction[] = { 0.0f, 0.0f, -1.0f };
+	//printf("function: %f\n", dynamicIntensity);
+
+	GLfloat second_light_diffuse_color[] = { dynamicIntensity, dynamicIntensity, dynamicIntensity, 1.0 };
+	GLfloat second_light_specular_color[] = { dynamicIntensity, dynamicIntensity, dynamicIntensity, 1.0 };
+	glLightfv(GL_LIGHT1, GL_POSITION, second_light_position);
+	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, second_spot_direction);
+	glLightfv(GL_LIGHT1, GL_DIFFUSE, second_light_diffuse_color);
+	glLightfv(GL_LIGHT1, GL_SPECULAR, second_light_specular_color);
+
+	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 200.0f);
+	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 200.0f);
+
+	glLightf(GL_LIGHT1, GL_CONSTANT_ATTENUATION, 1.0f);
+	glLightf(GL_LIGHT1, GL_LINEAR_ATTENUATION, 0.10f);
+	glLightf(GL_LIGHT1, GL_QUADRATIC_ATTENUATION, 0.01f);
+	
+}
+
+void updateIntensity(int value) {
+	dynamicIntensity += 0.1f * intensityDirection;
+	if (dynamicIntensity > 0.1) {
+		intensityDirection = -1;
+	}
+	else if (dynamicIntensity <= -0.5) {
+		intensityDirection = 1;
+	}
+	//printf("update: %f\n", dynamicIntensity);
+	glutTimerFunc(800, updateIntensity, 0);
 }
 
 
@@ -675,6 +712,8 @@ void drawSceneTransition() {
 
 void Display() {
 	setupCamera();
+	setupLights();
+
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -911,6 +950,7 @@ void Keyboard(unsigned char key, int x, int y) {
 
 	glutPostRedisplay();
 }
+
 void Special(int key, int x, int y) {
 	float a = 1.0;
 	float d = 0.3;
@@ -973,21 +1013,23 @@ void main(int argc, char** argv) {
 	glutSpecialFunc(Special);
 	glutMouseFunc(mouseClick);
 	glutTimerFunc(1000, updateGameTimer, 0);
-	glutDisplayFunc(Display);
 
 	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH);
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
 	glutTimerFunc(16, spachShipMovement, 0);
 
-	setupLights();
-
+	glutTimerFunc(800, updateIntensity, 0); // Initial timer for angle update with approximately 16 frames per second
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
+	glEnable(GL_LIGHT1);
 	glEnable(GL_NORMALIZE);
 	glEnable(GL_COLOR_MATERIAL);
+
+	glutDisplayFunc(Display);
+	setupSpaceshipLights();
 
 	glShadeModel(GL_SMOOTH);
 
