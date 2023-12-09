@@ -441,7 +441,6 @@ void setupCamera() {
 void spachShipMovement(int value) {
 	float d = 0.03;
 
-
 	if (isGameOver == false && health != 0 && remainingTime != 0) {
 		spaceshipZ += d;
 
@@ -515,16 +514,12 @@ void spachShipMovement(int value) {
 		else {
 			camera.eye.z = spaceshipZ - 3.0; // Adjust the camera's distance from the spaceship
 			camera.center.z = spaceshipZ;
+			camera.eye.x = spaceshipX;
 			camera.center.x = spaceshipX;
 		}
 
-
-
 		glutPostRedisplay();
-
-
 		glutTimerFunc(16, spachShipMovement, 0); // 16 milliseconds (about 60 frames per second)
-
 	}
 }
 
@@ -921,12 +916,14 @@ void Special(int key, int x, int y) {
 	case GLUT_KEY_LEFT:
 		if (spaceshipX + d < 1.6) {
 			spaceshipX += d;
+			camera.moveX(d);
 		}
 		//printf("spaceshipX: %f\n", spaceshipX);
 		break;
 	case GLUT_KEY_RIGHT:
 		if (spaceshipX - d > -1.6) {
 			spaceshipX -= d;
+			camera.moveX(-d);
 		}
 		break;
 	}
