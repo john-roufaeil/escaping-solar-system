@@ -463,11 +463,11 @@ void setupLights() {
 }
 
 void updateIntensity(int value) {
-	dynamicIntensity += 0.1f * intensityDirection;
+	dynamicIntensity += 0.5f * intensityDirection;
 	if (dynamicIntensity > 0.1) {
 		intensityDirection = -1;
 	}
-	else if (dynamicIntensity <= -0.5) {
+	else if (dynamicIntensity <= -1) {
 		intensityDirection = 1;
 	}
 	//printf("update: %f\n", dynamicIntensity);
