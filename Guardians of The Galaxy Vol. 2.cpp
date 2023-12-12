@@ -8,12 +8,8 @@
 #include <vector>
 #include <utility>
 #include <algorithm>
-
-
-// additional includes
 #include "glew.h"
 #include <glut.h>
-
 #include "TextureBuilder.h"
 #include "Model_3DS.h"
 #include "GLTexture.h"
@@ -70,6 +66,17 @@ bool thirdPersonView = false; // To toggle between third-person and normal views
 bool sceneOne = true; // To toggle between scene one and scene two
 bool sceneTwo = false; // To toggle between scene one and scene two  
 
+#define STB_IMAGE_IMPLEMENTATION
+
+#define M_PI 3.14159265358979323846
+
+
+
+GLuint tex;
+
+GLuint planetTexture;
+
+
 
 Model_3DS model_earth;
 Model_3DS model_gear;
@@ -77,6 +84,14 @@ Model_3DS model_screw;
 Model_3DS model_planet;
 Model_3DS model_spaceship;
 Model_3DS model_asteroid;
+Model_3DS model_asteroid2;
+Model_3DS model_sphere;
+
+GLTexture tex_planet;
+GLTexture tex_earth;
+GLTexture tex_background;
+GLTexture tex_background2;
+GLTexture tex_collectible;
 
 class Vector3f {
 public:
@@ -184,29 +199,101 @@ void drawSpaceship() {
 
 }
 
+void RenderTexturedSphere(GLuint texture, float radius, int slices, int stacks) {
+	glDisable(GL_LIGHTING); // Disable lighting
+
+	glEnable(GL_TEXTURE_2D); // Enable 2D texturing
+
+	glBindTexture(GL_TEXTURE_2D, texture); // Bind the planet texture
+
+	glPushMatrix();
+	glBegin(GL_QUADS);
+	for (int i = 0; i < stacks; ++i) {
+		for (int j = 0; j < slices; ++j) {
+			float u1 = j / static_cast<float>(slices);
+			float u2 = (j + 1) / static_cast<float>(slices);
+			float v1 = i / static_cast<float>(stacks);
+			float v2 = (i + 1) / static_cast<float>(stacks);
+
+			// Vertex 1
+			glTexCoord2f(u1, v1);
+			glVertex3f(radius * sin(2 * M_PI * j / slices) * sin(M_PI * i / stacks),
+				radius * cos(M_PI * i / stacks),
+				radius * cos(2 * M_PI * j / slices) * sin(M_PI * i / stacks));
+
+			// Vertex 2
+			glTexCoord2f(u2, v1);
+			glVertex3f(radius * sin(2 * M_PI * (j + 1) / slices) * sin(M_PI * i / stacks),
+				radius * cos(M_PI * i / stacks),
+				radius * cos(2 * M_PI * (j + 1) / slices) * sin(M_PI * i / stacks));
+
+			// Vertex 3
+			glTexCoord2f(u2, v2);
+			glVertex3f(radius * sin(2 * M_PI * (j + 1) / slices) * sin(M_PI * (i + 1) / stacks),
+				radius * cos(M_PI * (i + 1) / stacks),
+				radius * cos(2 * M_PI * (j + 1) / slices) * sin(M_PI * (i + 1) / stacks));
+
+			// Vertex 4
+			glTexCoord2f(u1, v2);
+			glVertex3f(radius * sin(2 * M_PI * j / slices) * sin(M_PI * (i + 1) / stacks),
+				radius * cos(M_PI * (i + 1) / stacks),
+				radius * cos(2 * M_PI * j / slices) * sin(M_PI * (i + 1) / stacks));
+		}
+	}
+	glEnd();
+	glPopMatrix();
+
+	glEnable(GL_LIGHTING); // Enable lighting again for other entities coming through the pipeline.
+
+	glColor3f(1, 1, 1); // Set material back to white
+	glDisable(GL_TEXTURE_2D);
+}
+
+
 void drawPlanet(float x, float z) {
+
 	glPushMatrix();
 
 	if (sceneOne) {
-		glColor3f(1.0f, 0.5f, 0.0f); // Orange color
 
-		glTranslated(x, -1.0, z);
+		glTranslated(x, 0.0, z);
 		glRotated(planetRotation, 0, 1, 0);
-		glScaled(0.05, 0.05, 0.05);
-		model_planet.Draw();
+		RenderTexturedSphere(tex_planet.texture[0], 3.0, 50, 50);
+
 	}
 	else if (sceneTwo) {
-		glColor3f(1.0f, 0.0f, 0.0f); // Red color
 
-		glTranslated(x, -2.0, z);
+		glTranslated(x, 0.0, z);
+		glRotated(180, 1, 0, 0);
 		glRotated(planetRotation, 0, 1, 0);
-		glScaled(0.03, 0.03, 0.03);
-		model_earth.Draw();
+
+		RenderTexturedSphere(tex_earth.texture[0], 3.0, 50, 50);
+
 	}
 
-	//glutSolidSphere(3.0, 50, 50);
-
 	glPopMatrix();
+}
+
+void drawBackground() {
+	// Set the radius of the background sphere (make it large)
+	float backgroundRadius = 50.0;
+
+	// Number of slices and stacks for the background sphere
+	int backgroundSlices = 50;
+	int backgroundStacks = 50;
+
+
+	if (sceneOne) {
+		glPushMatrix();
+		RenderTexturedSphere(tex_background.texture[0], backgroundRadius, backgroundSlices, backgroundStacks);
+		glPopMatrix();
+
+	}
+	else {
+		glPushMatrix();
+		RenderTexturedSphere(tex_background2.texture[0], backgroundRadius, backgroundSlices, backgroundStacks);
+		glPopMatrix();
+	}
 }
 
 
@@ -224,13 +311,12 @@ void drawCollectible(float x, float z) {
 
 
 	if (sceneOne) {
-		glColor3f(1.0f, 0.92f, 0.19f); // drga mn el yellow color for cammera_screw
+		//glColor3f(1.0f, 0.92f, 0.19f); // drga mn el yellow color for camera_screw
 		model_screw.Draw();
 	}
 	else {
-		collectibleSize = 0.02f;
 		glRotated(90, 1, 0, 0);
-		glColor3f(1.0f, 0.843f, 0.0f); // gold color
+		//glColor3f(1.0f, 0.843f, 0.0f); // gold color
 		model_gear.Draw();
 	}
 
@@ -277,14 +363,27 @@ void updateCollectibleRotation(int value) {
 void drawObstacle(float x, float z) {
 
 	glPushMatrix();
-	glColor3f(1.0f, 0.0f, 0.0f); // Red color
 
-	glTranslated(x, 0.0, z);
-	glScaled(obstacleSize, obstacleSize, obstacleSize); // 
+	if (sceneOne) {
+		//glColor3f(1.0f, 0.0f, 0.0f); // Red color
 
-	glRotated(obstacleRotation, 0, 1, 0);
+		glTranslated(x, 0.0, z);
+		glScaled(obstacleSize, obstacleSize, obstacleSize); // 
 
-	model_asteroid.Draw();
+		glRotated(obstacleRotation, 0, 1, 0);
+
+		model_asteroid.Draw();
+
+	}
+	else {
+		obstacleSize= 0.005f;
+		glTranslated(x, 0.0, z);
+		glScaled(obstacleSize, obstacleSize, obstacleSize); 
+
+		glRotated(obstacleRotation, 0, 1, 0);
+
+		model_asteroid2.Draw();
+	}
 
 	glPopMatrix();
 
@@ -646,6 +745,10 @@ void Display() {
 		else {
 
 			glPushMatrix();
+			drawBackground();
+			glPopMatrix();
+
+			glPushMatrix();
 			drawScore(score);
 			glPopMatrix();
 
@@ -778,6 +881,10 @@ void Display() {
 		}
 
 		else {
+
+			glPushMatrix();
+			drawBackground();
+			glPopMatrix();
 
 			glPushMatrix();
 			drawScore(score);
@@ -927,12 +1034,20 @@ void mouseClick(int button, int state, int x, int y) {
 void LoadAssets()
 {
 	// Loading Model files
-	model_screw.Load("Models/camera_screw.3DS");
-	model_gear.Load("Models/extgearLspring.3DS");
-	model_planet.Load("Models/V7_50mm_full_sphere.3DS");
-	model_earth.Load("Models/cmb_1_2_10_28.3DS");
+	model_screw.Load("Models/Screw Metal.3DS");
+	model_gear.Load("Models/Many Gears.3DS");
 	model_asteroid.Load("Models/Rock07-Base.3DS");
+	model_asteroid2.Load("Models/Campfire.3DS");
 	model_spaceship.Load("Models/Tie_Fighter.3DS");
+
+
+	// Loading texture files
+	tex_planet.Load("Models/2k_venus_surface.bmp");
+	tex_earth.Load("Models/Color Map.bmp");
+	tex_background.Load("Models/space.bmp");
+	tex_background2.Load("Models/RGB_b42b1c91eb23431cb67cccc5735bb41e_twtw_diffuse.bmp");
+	tex_collectible.Load("Models/Metal G6.bmp");
+	
 
 
 
